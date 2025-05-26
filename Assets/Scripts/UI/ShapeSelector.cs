@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class ShapeSelector : MonoBehaviour
 {
-    public void UpdateShape(int set)
+    [SerializeField] GameObject faceCount;
+
+    public void ChangeShape(int set)
     {
-        ShapeManager.instance.currentShape = (ShapeType) set;
+        ShapeManager.instance.SetShape(set);
+        faceCount.SetActive(set == (int)ShapeType.RegularShape);
     }
 }
