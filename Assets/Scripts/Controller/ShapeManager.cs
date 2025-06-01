@@ -1,8 +1,5 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
-
-public enum ShapeType { Point, Line, Circle, RegularShape, IrregularShape, }
-
 public class ShapeManager : MonoBehaviour
 {
     public static ShapeManager instance;
@@ -12,6 +9,9 @@ public class ShapeManager : MonoBehaviour
     private bool isDrawing = false;
 
     public Material lineMaterial;
+
+    [HideInInspector] 
+    public Color borderColor = Color.black, fillColor = Color.clear;
 
     private GameObject previewObject;
     private LineRenderer previewRenderer;
@@ -105,7 +105,10 @@ public class ShapeManager : MonoBehaviour
 
     void DrawShape(Vector3 p1, Vector3 p2)
     {
-        GameObject shapeObj = new("Shape");
+        GameObject shapeObj = new("Shape")
+        {
+            tag = "Shape",
+        };
         LineRenderer lr = shapeObj.AddComponent<LineRenderer>();
         lr.material = lineMaterial;
         lr.widthMultiplier = 0.075f;
