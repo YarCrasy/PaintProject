@@ -17,6 +17,7 @@ public class ColorPicker : MonoBehaviour
     {
         currentColor = new Color(redSlider.value / 255, greenSlider.value / 255, blueSlider.value / 255);
         colorDisplayer.color = currentColor;
+        Debug.Log("actual color: " + currentColor);
     }
 
 }

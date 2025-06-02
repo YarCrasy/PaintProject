@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 public class ShapeManager : MonoBehaviour
@@ -10,13 +11,14 @@ public class ShapeManager : MonoBehaviour
 
     public Material lineMaterial;
 
-    [HideInInspector] 
-    public Color borderColor = Color.black, fillColor = Color.clear;
+    [SerializeField] ColorPicker borderPicker, fillPicker;
 
     private GameObject previewObject;
     private LineRenderer previewRenderer;
 
     int faceCount = 3;
+
+    List<GameObject> shapes = new();
 
     private void Awake()
     {
@@ -34,7 +36,11 @@ public class ShapeManager : MonoBehaviour
 
             previewObject = new("PreviewShape");
             previewRenderer = previewObject.AddComponent<LineRenderer>();
-            previewRenderer.material = lineMaterial;
+            previewRenderer.material = new Material(lineMaterial)
+            {
+                color = borderPicker.currentColor
+            };
+
             previewRenderer.widthMultiplier = 0.075f;
             previewRenderer.loop = currentShape == ShapeType.Circle;
         }
@@ -68,23 +74,7 @@ public class ShapeManager : MonoBehaviour
 
     void UpdatePreviewShape(Vector3 p1, Vector3 p2)
     {
-        switch (currentShape)
-        {
-            case ShapeType.Point:
-                DrawPoint(previewRenderer, p1);
-                break;
-            case ShapeType.Line:
-                DrawLine(previewRenderer, p1, p2);
-                break;
-
-            case ShapeType.Circle:
-                DrawCircle(previewRenderer, p1, Vector3.Distance(p1, p2));
-                break;
-
-            case ShapeType.RegularShape:
-                DrawRegularShape(previewRenderer, p1, Vector3.Distance(p1, p2));
-                break;
-        }
+        ShapeCase(previewRenderer, p1, p2);
     }
 
     public void SetShape(int set)
@@ -110,10 +100,20 @@ public class ShapeManager : MonoBehaviour
             tag = "Shape",
         };
         LineRenderer lr = shapeObj.AddComponent<LineRenderer>();
-        lr.material = lineMaterial;
+        lr.material = new(lineMaterial)
+        {
+            color = borderPicker.currentColor
+        };
         lr.widthMultiplier = 0.075f;
         lr.loop = currentShape == ShapeType.Circle;
 
+        shapes.Add(shapeObj);
+
+        ShapeCase(lr, p1, p2);
+    }
+
+    void ShapeCase(LineRenderer lr, Vector3 p1, Vector3 p2)
+    {
         switch (currentShape)
         {
             case ShapeType.Point:
@@ -142,6 +142,11 @@ public class ShapeManager : MonoBehaviour
 
     void DrawLine(LineRenderer lr, Vector3 p1, Vector3 p2)
     {
+        if (p1 == p2)
+        {
+            DrawPoint(lr, p1);
+            return;
+        }
         lr.positionCount = 2;
         lr.SetPosition(0, p1);
         lr.SetPosition(1, p2);
@@ -149,6 +154,12 @@ public class ShapeManager : MonoBehaviour
 
     void DrawRegularShape(LineRenderer lr, Vector3 center, float radius)
     {
+        if (radius == 0)
+        {
+            DrawPoint(lr, center);
+            return;
+        }
+
         lr.positionCount = faceCount + 1;
         for (int i = 0; i <= faceCount; i++)
         {
@@ -160,6 +171,11 @@ public class ShapeManager : MonoBehaviour
 
     void DrawCircle(LineRenderer lr, Vector3 center, float radius)
     {
+        if (radius == 0)
+        {
+            DrawPoint(lr, center);
+            return;
+        }
         faceCount = 60; 
         DrawRegularShape(lr, center, radius);
     }
