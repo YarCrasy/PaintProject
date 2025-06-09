@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+
 public class ShapeManager : MonoBehaviour
 {
     public static ShapeManager instance;
@@ -61,6 +62,30 @@ public class ShapeManager : MonoBehaviour
                 isDrawing = false;
 
                 // Guardar los datos aqui
+                Vector3[] positions = new Vector3[previewRenderer.positionCount];
+                previewRenderer.GetPositions(positions);
+
+                List<Vector2> shapePoints = new();
+                foreach (Vector3 pos in positions)
+                    shapePoints.Add(new(pos.x, pos.y));
+
+                Shape shapeData = new(currentShape)
+                {
+                    drawingId = 1,
+                    color = borderPicker.currentColor,
+                    thickness = 0.075f,
+                    position = new Vector2(startPoint.x, startPoint.y),
+                    points = shapePoints
+                };
+
+                DBController.instance.InsertShape(
+                    drawingId: shapeData.drawingId,
+                    type: shapeData.type.ToString(),
+                    color: shapeData.color,
+                    thickness: shapeData.thickness,
+                    points: shapeData.points
+                );
+
             }
         }
     }
