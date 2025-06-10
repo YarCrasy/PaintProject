@@ -21,6 +21,14 @@ public class DBController : MonoBehaviour
         if (!File.Exists(filePath)) CreateDB();
     }
 
+    private void Update()
+    {
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+    }
+
     public string GetDBPath() => dbPath;
 
     private void CreateDB()

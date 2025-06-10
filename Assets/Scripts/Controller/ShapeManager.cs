@@ -307,10 +307,16 @@ public class ShapeManager : MonoBehaviour
                 DrawLine(lr, p1, p2);
                 break;
             case ShapeType.Circle:
-                DrawCircleFilled(p1, Vector3.Distance(p1, p2), 60, fillPicker.currentColor, borderPicker.currentColor, 0.075f);
+                if (fillPicker.currentColor.a == 0f)
+                    DrawCircle(lr, p1, Vector3.Distance(p1, p2));
+                else
+                    DrawCircleFilled(p1, Vector3.Distance(p1, p2), 60, fillPicker.currentColor, borderPicker.currentColor, 0.075f);
                 break;
             case ShapeType.RegularShape:
-                DrawRegularShapeFilled(p1, Vector3.Distance(p1, p2), faceCount, fillPicker.currentColor, borderPicker.currentColor, 0.075f);
+                if (fillPicker.currentColor.a == 0f)
+                    DrawRegularShape(lr, p1, Vector3.Distance(p1, p2));
+                else
+                    DrawRegularShapeFilled(p1, Vector3.Distance(p1, p2), faceCount, fillPicker.currentColor, borderPicker.currentColor, 0.075f);
                 break;
         }
     }

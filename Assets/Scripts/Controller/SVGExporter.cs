@@ -58,8 +58,29 @@ public static class SVGExporter
                             sw.WriteLine($"<circle cx='{p.x}' cy='{p.y}' r='2' fill='rgb({shape.color.r * 255},{shape.color.g * 255},{shape.color.b * 255})' />");
                         }
                         break;
+                    case ShapeType.IrregularShape:
+                    case ShapeType.RegularShape:
+                    case ShapeType.Circle:
+                        {
+                            // Relleno
+                            string fill = shape.fillColor.a > 0
+                                ? $"fill='rgba({shape.fillColor.r * 255},{shape.fillColor.g * 255},{shape.fillColor.b * 255},{shape.fillColor.a})'"
+                                : "fill='none'";
+                            // Borde
+                            string stroke = $"stroke='rgb({shape.color.r * 255},{shape.color.g * 255},{shape.color.b * 255})'";
+                            string strokeWidth = $"stroke-width='{shape.thickness * 10}'";
+
+                            sw.Write("<polygon points='");
+                            foreach (var p in shape.points)
+                            {
+                                Vector2 svgP = ToSVG(p);
+                                sw.Write($"{svgP.x},{svgP.y} ");
+                            }
+                            sw.WriteLine($"' {fill} {stroke} {strokeWidth} />");
+                        }
+                        break;
                     default:
-                        // Polígonos y círculos como polilíneas
+                        // Otros casos como polilínea sin relleno
                         sw.Write("<polyline points='");
                         foreach (var p in shape.points)
                         {

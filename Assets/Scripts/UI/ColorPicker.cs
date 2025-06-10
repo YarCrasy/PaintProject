@@ -12,6 +12,7 @@ public class ColorPicker : MonoBehaviour
     private void Awake()
     {
         UpdateColorDisplay();
+        currentColor.a = (transparentToggle != null && transparentToggle.isOn) ? 0f : 1f;
         if (transparentToggle != null)
             transparentToggle.onValueChanged.AddListener(SetTransparency);
     }

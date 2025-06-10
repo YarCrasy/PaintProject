@@ -490,6 +490,7 @@ MonoBehaviour:
   redSlider: {fileID: 1112869727739673838}
   greenSlider: {fileID: 7302769661904751064}
   blueSlider: {fileID: 6986838769893108653}
+  transparentToggle: {fileID: 6049240013234699574}
   currentColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &1927362158193959883
 GameObject:
