@@ -28,6 +28,10 @@ public class ShapeManager : MonoBehaviour
     private void Awake()
     {
         instance = this;
+    }
+
+    private void Start()
+    {
         currentDrawingId = DBController.instance.CreateNewDrawing();
     }
 

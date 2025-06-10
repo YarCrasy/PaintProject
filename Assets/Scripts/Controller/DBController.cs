@@ -49,10 +49,10 @@ public class DBController : MonoBehaviour
                 color_g REAL NOT NULL,
                 color_b REAL NOT NULL,
                 thickness REAL NOT NULL,
-                fill_r REAL NOT NULL,
-                fill_g REAL NOT NULL,
-                fill_b REAL NOT NULL,
-                fill_a REAL NOT NULL,
+                fill_r REAL,
+                fill_g REAL,
+                fill_b REAL,
+                fill_a REAL,
                 FOREIGN KEY (drawing_id) REFERENCES Drawings(id) ON DELETE CASCADE
             );
 
