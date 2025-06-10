@@ -7,7 +7,7 @@ public class DrawingManager : MonoBehaviour
 {
     public static DrawingManager instance;
 
-    [SerializeField] private Material lineMaterial;
+    [SerializeField] Material lineMaterial;
     public int drawingIdToLoad = 1;
 
     private void Awake()
@@ -18,7 +18,8 @@ public class DrawingManager : MonoBehaviour
 
     private void Start()
     {
-        LoadDrawing(drawingIdToLoad);
+        int drawingId = ShapeManager.instance != null ? ShapeManager.instance.currentDrawingId : 1;
+        LoadDrawing(drawingId);
     }
 
     public void LoadDrawing(int drawingId)
@@ -46,7 +47,7 @@ public class DrawingManager : MonoBehaviour
         using (var shapeCmd = connection.CreateCommand())
         {
             shapeCmd.CommandText = @"
-                SELECT id, type, color_r, color_g, color_b, thickness, drawing_id
+                SELECT id, type, color_r, color_g, color_b, thickness, drawing_id, fill_r, fill_g, fill_b, fill_a
                 FROM Shapes
                 WHERE drawing_id = @drawingId;
             ";
@@ -61,7 +62,13 @@ public class DrawingManager : MonoBehaviour
                     color = new Color(reader.GetFloat(2), reader.GetFloat(3), reader.GetFloat(4)),
                     thickness = reader.GetFloat(5),
                     drawingId = reader.GetInt32(6),
-                    points = new List<Vector2>()
+                    points = new List<Vector2>(),
+                    fillColor = new Color(
+                        reader.GetFloat(7), // fill_r
+                        reader.GetFloat(8), // fill_g
+                        reader.GetFloat(9), // fill_b
+                        reader.GetFloat(10) // fill_a
+                    )
                 };
 
                 shapes.Add(shape);
@@ -96,8 +103,10 @@ public class DrawingManager : MonoBehaviour
 
     private void DrawShapeFromData(Shape shape)
     {
-        GameObject shapeObj = new("Shape");
-        shapeObj.tag = "Shape";
+        GameObject shapeObj = new("Shape")
+        {
+            tag = "Shape"
+        };
 
         LineRenderer lr = shapeObj.AddComponent<LineRenderer>();
         lr.material = new Material(lineMaterial)
@@ -138,5 +147,47 @@ public class DrawingManager : MonoBehaviour
                 lr.loop = true;
                 break;
         }
+
+        // Relleno para figuras cerradas
+        if ((shape.type == ShapeType.IrregularShape || shape.type == ShapeType.RegularShape || shape.type == ShapeType.Circle)
+            && shape.points.Count >= 3)
+        {
+            List<Vector3> points3D = new();
+            foreach (var pt in shape.points)
+                points3D.Add(new(pt.x, pt.y, 0));
+            CreatePolygonFill(points3D, shape.fillColor);
+        }
+    }
+
+    private void CreatePolygonFill(List<Vector3> points, Color fillColor)
+    {
+        // No crear mesh si el color es completamente transparente
+        if (points.Count < 3 || fillColor.a == 0f) return;
+
+        GameObject fillObj = new("ShapeFill") { tag = "Shape" };
+        MeshFilter mf = fillObj.AddComponent<MeshFilter>();
+        MeshRenderer mr = fillObj.AddComponent<MeshRenderer>();
+        // Usa el mismo material de línea para el relleno, o crea uno específico si lo prefieres
+        mr.material = new Material(lineMaterial) { color = fillColor };
+
+        Mesh mesh = new();
+
+        // Proyección a 2D para triangulación
+        Vector2[] verts2D = new Vector2[points.Count];
+        for (int i = 0; i < points.Count; i++)
+            verts2D[i] = new Vector2(points[i].x, points[i].y);
+
+        // Triangulación simple (ear clipping)
+        Triangulator triangulator = new Triangulator(verts2D);
+        int[] indices = triangulator.Triangulate();
+
+        Vector3[] verts3D = points.ToArray();
+
+        mesh.vertices = verts3D;
+        mesh.triangles = indices;
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
+        mf.mesh = mesh;
     }
 }

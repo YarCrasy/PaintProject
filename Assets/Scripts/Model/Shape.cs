@@ -9,6 +9,7 @@ public class Shape
     public int drawingId;
     public ShapeType type;
     public Color color;
+    public Color fillColor;
     public float thickness;
     public Vector2 position;
     public List<Vector2> points = new();
