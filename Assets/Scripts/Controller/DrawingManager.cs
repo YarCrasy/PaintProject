@@ -31,6 +31,13 @@ public class DrawingManager : MonoBehaviour
         }
     }
 
+    public void ExportCurrentDrawingToSVG()
+    {
+        int drawingId = ShapeManager.instance != null ? ShapeManager.instance.currentDrawingId : 1;
+        List<Shape> shapes = LoadShapesFromDB(drawingId);
+        SVGExporter.ExportDrawingToSVG(shapes, drawingId);
+    }
+
     private List<Shape> LoadShapesFromDB(int drawingId)
     {
         List<Shape> shapes = new();
