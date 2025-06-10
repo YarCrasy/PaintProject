@@ -410,22 +410,32 @@ public class ShapeManager : MonoBehaviour
 
     void CreatePolygonFill(List<Vector3> points, Color fillColor)
     {
-        // No crear mesh si el color es completamente transparente
         if (points.Count < 3 || fillColor.a == 0f) return;
 
         GameObject fillObj = new("ShapeFill") { tag = "Shape" };
         MeshFilter mf = fillObj.AddComponent<MeshFilter>();
         MeshRenderer mr = fillObj.AddComponent<MeshRenderer>();
-        mr.material = new Material(fillMaterial) { color = fillColor };
+
+        // Crear material con transparencia
+        Material mat = new Material(fillMaterial);
+        mat.color = fillColor;
+        if (mat.HasProperty("_Mode"))
+            mat.SetFloat("_Mode", 3); // 3 = Transparent en Standard Shader
+        mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        mat.SetInt("_ZWrite", 0);
+        mat.DisableKeyword("_ALPHATEST_ON");
+        mat.EnableKeyword("_ALPHABLEND_ON");
+        mat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        mat.renderQueue = 3000;
+
+        mr.material = mat;
 
         Mesh mesh = new Mesh();
-
-        // Proyección a 2D para triangulación
         Vector2[] verts2D = new Vector2[points.Count];
         for (int i = 0; i < points.Count; i++)
             verts2D[i] = new Vector2(points[i].x, points[i].y);
 
-        // Triangulación simple (ear clipping)
         Triangulator triangulator = new Triangulator(verts2D);
         int[] indices = triangulator.Triangulate();
 
@@ -437,6 +447,18 @@ public class ShapeManager : MonoBehaviour
         mesh.RecalculateBounds();
 
         mf.mesh = mesh;
+    }
+
+    void CreatePolygonFillFromShape(Shape shape)
+    {
+        if ((shape.type == ShapeType.IrregularShape || shape.type == ShapeType.RegularShape || shape.type == ShapeType.Circle)
+            && shape.points.Count >= 3)
+        {
+            List<Vector3> points3D = new();
+            foreach (var pt in shape.points)
+                points3D.Add(new(pt.x, pt.y, 0));
+            CreatePolygonFill(points3D, shape.fillColor);
+        }
     }
 
     // Devuelve true si los segmentos (p1,p2) y (q1,q2) se cruzan
