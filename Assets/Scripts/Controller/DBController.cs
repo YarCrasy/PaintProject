@@ -88,6 +88,10 @@ public class DBController : MonoBehaviour
         using var connection = new SqliteConnection(GetDBPath());
         connection.Open();
 
+        if (fillColor == null) {
+            fillColor = new Color(0, 0, 0, 0); // Default transparent fill color
+        }
+
         using var pragma = connection.CreateCommand();
         pragma.CommandText = "PRAGMA foreign_keys = ON;";
         pragma.ExecuteNonQuery();
