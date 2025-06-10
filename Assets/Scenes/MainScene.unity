@@ -255,6 +255,10 @@ PrefabInstance:
       propertyPath: m_text
       value: Fill Color
       objectReference: {fileID: 0}
+    - target: {fileID: 6049240013234699574, guid: aa052da8e187a474a8091ff1026974d0, type: 3}
+      propertyPath: m_IsOn
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8153643510862157731, guid: aa052da8e187a474a8091ff1026974d0, type: 3}
       propertyPath: m_Color.a
       value: 0.39215687
